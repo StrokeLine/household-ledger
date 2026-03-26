@@ -300,19 +300,11 @@
 
   // ========== 요약 업데이트 ==========
   function updateSummary() {
-    var income = 0;
     var expense = 0;
-
     state.entries.forEach(function (e) {
       expense += e.amount;
     });
-
-    var balance = income - expense;
-
-    $('totalIncome').textContent = formatAmount(income) + '원';
     $('totalExpense').textContent = formatAmount(expense) + '원';
-    $('totalBalance').textContent = formatAmount(balance) + '원';
-    $('totalBalance').className = 'summary-value ' + (balance >= 0 ? 'income' : 'expense');
   }
 
   // ========== 리스트 렌더링 ==========
