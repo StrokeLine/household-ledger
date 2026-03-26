@@ -49,12 +49,46 @@
   function init() {
     bindEvents();
     updateMonthDisplay();
+
+    // 저장된 토큰으로 자동 로그인 시도
+    var savedToken = localStorage.getItem('idToken');
+    if (savedToken) {
+      var payload = parseJwt(savedToken);
+      // 토큰 만료 확인 (exp는 초 단위)
+      if (payload.exp && payload.exp * 1000 > Date.now()) {
+        restoreSession(savedToken, payload);
+        return;
+      }
+      // 만료된 토큰 삭제
+      localStorage.removeItem('idToken');
+    }
+
+    initGoogleAuth();
+  }
+
+  // ========== 세션 복원 (자동 로그인) ==========
+  function restoreSession(token, payload) {
+    state.idToken = token;
+    state.user = {
+      email: payload.email,
+      name: payload.name,
+      picture: payload.picture
+    };
+
+    loginScreen.style.display = 'none';
+    var avatar = $('userAvatar');
+    avatar.src = state.user.picture;
+    avatar.alt = state.user.name;
+    $('btnUser').style.display = 'flex';
+
+    loadData();
+
+    // 백그라운드에서 Google Auth 초기화 (토큰 갱신 대비)
     initGoogleAuth();
   }
 
   // ========== Google OAuth 초기화 ==========
   function initGoogleAuth() {
-    // Google Identity Services 라이브러리 로드 대기
     if (typeof google === 'undefined' || !google.accounts) {
       setTimeout(initGoogleAuth, 200);
       return;
@@ -63,28 +97,35 @@
     google.accounts.id.initialize({
       client_id: GOOGLE_CLIENT_ID,
       callback: handleGoogleLogin,
-      auto_select: true // 재방문 시 자동 로그인
+      auto_select: true
     });
 
-    // 로그인 버튼 렌더링
-    google.accounts.id.renderButton($('googleLoginBtn'), {
-      theme: 'outline',
-      size: 'large',
-      width: 280,
-      text: 'signin_with',
-      shape: 'rectangular'
-    });
+    // 이미 로그인된 상태가 아니면 로그인 UI 표시
+    if (!state.user) {
+      google.accounts.id.renderButton($('googleLoginBtn'), {
+        theme: 'outline',
+        size: 'large',
+        width: 280,
+        text: 'signin_with',
+        shape: 'rectangular'
+      });
 
-    // 자동 로그인 시도 (One Tap)
-    google.accounts.id.prompt();
+      google.accounts.id.prompt(function (notification) {
+        // 자동 로그인 실패 시 로그인 화면 유지
+        if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+          loginScreen.style.display = 'flex';
+        }
+      });
+    }
   }
 
   // ========== Google 로그인 콜백 ==========
   function handleGoogleLogin(response) {
-    // JWT 토큰 저장 (Apps Script 인증용)
     state.idToken = response.credential;
 
-    // JWT 토큰 디코딩
+    // 토큰 localStorage에 저장 (자동 로그인용)
+    localStorage.setItem('idToken', response.credential);
+
     var payload = parseJwt(response.credential);
 
     state.user = {
@@ -198,7 +239,9 @@
     $('btnUser').addEventListener('click', function () {
       if (confirm(state.user.name + ' (' + state.user.email + ')\n\n로그아웃 하시겠습니까?')) {
         google.accounts.id.disableAutoSelect();
+        localStorage.removeItem('idToken');
         state.user = null;
+        state.idToken = null;
         loginScreen.style.display = 'flex';
         $('btnUser').style.display = 'none';
       }
@@ -522,9 +565,11 @@
         // 인증 실패 시 재로그인
         if (!result.success && result.message && result.message.indexOf('인증') !== -1) {
           showToast('로그인이 만료되었습니다. 다시 로그인해주세요.');
+          localStorage.removeItem('idToken');
           state.user = null;
           state.idToken = null;
           loginScreen.style.display = 'flex';
+          $('btnUser').style.display = 'none';
           return;
         }
         resolve(result);
