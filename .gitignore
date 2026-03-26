@@ -1,1 +1,2 @@
-js/config.js
+# 필요 시 로컬 설정 오버라이드
+js/config.local.js

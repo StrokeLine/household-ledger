@@ -34,6 +34,7 @@
     filteredEntries: [],
     filter: 'all',
     user: null, // { email, name, picture }
+    idToken: null, // Google OAuth JWT token
     editingEntry: null
   };
 
@@ -80,6 +81,9 @@
 
   // ========== Google 로그인 콜백 ==========
   function handleGoogleLogin(response) {
+    // JWT 토큰 저장 (Apps Script 인증용)
+    state.idToken = response.credential;
+
     // JWT 토큰 디코딩
     var payload = parseJwt(response.credential);
 
@@ -501,6 +505,9 @@
 
   // ========== JSONP 요청 (CORS 우회) ==========
   function jsonpRequest(params) {
+    // 토큰 자동 추가
+    params.token = state.idToken || '';
+
     return new Promise(function (resolve, reject) {
       var callbackName = 'gasCb_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
       var script = document.createElement('script');
@@ -512,6 +519,14 @@
       window[callbackName] = function (result) {
         delete window[callbackName];
         if (document.body.contains(script)) document.body.removeChild(script);
+        // 인증 실패 시 재로그인
+        if (!result.success && result.message && result.message.indexOf('인증') !== -1) {
+          showToast('로그인이 만료되었습니다. 다시 로그인해주세요.');
+          state.user = null;
+          state.idToken = null;
+          loginScreen.style.display = 'flex';
+          return;
+        }
         resolve(result);
       };
 
