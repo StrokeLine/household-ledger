@@ -76,10 +76,7 @@
     };
 
     loginScreen.style.display = 'none';
-    var avatar = $('userAvatar');
-    avatar.src = state.user.picture;
-    avatar.alt = state.user.name;
-    $('btnUser').style.display = 'flex';
+    showUserAvatar();
 
     loadData();
 
@@ -134,16 +131,9 @@
       picture: payload.picture
     };
 
-    // 로그인 화면 숨기기
     loginScreen.style.display = 'none';
+    showUserAvatar();
 
-    // 사용자 아바타 표시
-    var avatar = $('userAvatar');
-    avatar.src = state.user.picture;
-    avatar.alt = state.user.name;
-    $('btnUser').style.display = 'flex';
-
-    // 데이터 로드
     loadData();
   }
 
@@ -562,6 +552,7 @@
       window[callbackName] = function (result) {
         delete window[callbackName];
         if (document.body.contains(script)) document.body.removeChild(script);
+        console.log('[JSONP 응답]', JSON.stringify(result));
         // 인증 실패 시 재로그인
         if (!result.success && result.message && result.message.indexOf('인증') !== -1) {
           showToast('로그인이 만료되었습니다. 다시 로그인해주세요.');
@@ -576,7 +567,9 @@
       };
 
       script.src = SCRIPT_URL + '?' + query + '&callback=' + callbackName;
+      console.log('[JSONP 요청] URL 길이:', script.src.length);
       script.onerror = function () {
+        console.error('[JSONP 오류] script load 실패');
         delete window[callbackName];
         if (document.body.contains(script)) document.body.removeChild(script);
         reject(new Error('요청 실패'));
@@ -595,6 +588,15 @@
   }
 
   // ========== 유틸리티 ==========
+  function showUserAvatar() {
+    var avatar = $('userAvatar');
+    var name = state.user.name || state.user.email;
+    // 첫 글자를 이니셜로 표시
+    avatar.textContent = name.charAt(0).toUpperCase();
+    avatar.title = state.user.name + '\n' + state.user.email;
+    $('btnUser').style.display = 'flex';
+  }
+
   function formatAmount(num) {
     return Math.abs(num).toLocaleString('ko-KR');
   }
