@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head><title>아이콘 생성기</title></head>
+<body style="padding:20px;font-family:sans-serif;background:#f0f0f0;">
+<h2>아이콘 생성기 (모던 디자인)</h2>
+
+<div style="display:flex;gap:40px;flex-wrap:wrap;">
+  <div>
+    <h3>192x192</h3>
+    <canvas id="c192" width="192" height="192"></canvas>
+    <br>
+  </div>
+  <div>
+    <h3>512x512</h3>
+    <canvas id="c512" width="512" height="512"></canvas>
+    <br>
+  </div>
+</div>
+
+<script>
+function drawIcon(canvas) {
+  var s = canvas.width;
+  var ctx = canvas.getContext('2d');
+
+  // 배경 - 부드러운 둥근 사각형
+  var r = s * 0.22;
+  ctx.beginPath();
+  ctx.moveTo(r, 0);
+  ctx.lineTo(s - r, 0);
+  ctx.quadraticCurveTo(s, 0, s, r);
+  ctx.lineTo(s, s - r);
+  ctx.quadraticCurveTo(s, s, s - r, s);
+  ctx.lineTo(r, s);
+  ctx.quadraticCurveTo(0, s, 0, s - r);
+  ctx.lineTo(0, r);
+  ctx.quadraticCurveTo(0, 0, r, 0);
+  ctx.closePath();
+
+  // 그라데이션 배경 (모던 블루-퍼플)
+  var grad = ctx.createLinearGradient(0, 0, s, s);
+  grad.addColorStop(0, '#6366F1');
+  grad.addColorStop(0.5, '#5380EA');
+  grad.addColorStop(1, '#3B82F6');
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // 지갑 아이콘 (미니멀)
+  var lw = s * 0.025;
+  ctx.strokeStyle = 'rgba(255,255,255,0.95)';
+  ctx.fillStyle = 'rgba(255,255,255,0.15)';
+  ctx.lineWidth = lw;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+
+  // 지갑 본체
+  var wx = s * 0.24;
+  var wy = s * 0.22;
+  var ww = s * 0.52;
+  var wh = s * 0.42;
+  var wr = s * 0.05;
+
+  ctx.beginPath();
+  ctx.moveTo(wx + wr, wy);
+  ctx.lineTo(wx + ww - wr, wy);
+  ctx.quadraticCurveTo(wx + ww, wy, wx + ww, wy + wr);
+  ctx.lineTo(wx + ww, wy + wh - wr);
+  ctx.quadraticCurveTo(wx + ww, wy + wh, wx + ww - wr, wy + wh);
+  ctx.lineTo(wx + wr, wy + wh);
+  ctx.quadraticCurveTo(wx, wy + wh, wx, wy + wh - wr);
+  ctx.lineTo(wx, wy + wr);
+  ctx.quadraticCurveTo(wx, wy, wx + wr, wy);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+
+  // 지갑 카드 슬롯
+  var sx = s * 0.52;
+  var sy = s * 0.34;
+  var sw = s * 0.24;
+  var sh = s * 0.14;
+  var sr = s * 0.03;
+
+  ctx.beginPath();
+  ctx.moveTo(sx, sy);
+  ctx.lineTo(sx + sw - sr, sy);
+  ctx.quadraticCurveTo(sx + sw, sy, sx + sw, sy + sr);
+  ctx.lineTo(sx + sw, sy + sh - sr);
+  ctx.quadraticCurveTo(sx + sw, sy + sh, sx + sw - sr, sy + sh);
+  ctx.lineTo(sx, sy + sh);
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(255,255,255,0.25)';
+  ctx.fill();
+  ctx.stroke();
+
+  // 동전 (원)
+  var coinX = sx + sw * 0.45;
+  var coinY = sy + sh * 0.5;
+  var coinR = s * 0.032;
+  ctx.beginPath();
+  ctx.arc(coinX, coinY, coinR, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(255,255,255,0.95)';
+  ctx.fill();
+
+  // 하단 금액 텍스트
+  ctx.fillStyle = '#FFFFFF';
+  ctx.font = '600 ' + (s * 0.12) + 'px -apple-system, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('₩', s * 0.5, s * 0.78);
+
+  // 장식 - 우측 상단 빛남 효과
+  ctx.beginPath();
+  ctx.arc(s * 0.78, s * 0.15, s * 0.015, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(255,255,255,0.6)';
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.arc(s * 0.85, s * 0.22, s * 0.008, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+drawIcon(document.getElementById('c192'));
+drawIcon(document.getElementById('c512'));
+
+document.querySelectorAll('canvas').forEach(function(c) {
+  var btn = document.createElement('button');
+  btn.textContent = c.id.replace('c', 'icon-') + '.png 다운로드';
+  btn.style.cssText = 'display:block;margin-top:8px;padding:10px 20px;cursor:pointer;background:#5380EA;color:#fff;border:none;border-radius:8px;font-size:14px;';
+  btn.onclick = function() {
+    var a = document.createElement('a');
+    a.download = c.id.replace('c', 'icon-') + '.png';
+    a.href = c.toDataURL('image/png');
+    a.click();
+  };
+  c.parentNode.appendChild(btn);
+});
+</script>
+</body>
+</html>
