@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#5380EA">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>가계부</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+  <!-- ========== 헤더 ========== -->
+  <header class="header">
+    <button id="btnPrevMonth" class="header-btn">&lt;</button>
+    <h1 id="currentMonth" class="header-title">2026년 3월</h1>
+    <button id="btnNextMonth" class="header-btn">&gt;</button>
+    <button id="btnUser" class="header-user" title="사용자 정보">
+      <img id="userAvatar" class="user-avatar" src="" alt="">
+    </button>
+  </header>
+
+  <!-- ========== 요약 ========== -->
+  <div class="summary-bar">
+    <div class="summary-item">
+      <span class="summary-label">수입</span>
+      <span id="totalIncome" class="summary-value income">0원</span>
+    </div>
+    <div class="summary-item">
+      <span class="summary-label">지출</span>
+      <span id="totalExpense" class="summary-value expense">0원</span>
+    </div>
+    <div class="summary-item">
+      <span class="summary-label">합계</span>
+      <span id="totalBalance" class="summary-value">0원</span>
+    </div>
+  </div>
+
+  <!-- ========== 필터 탭 ========== -->
+  <div class="filter-tabs">
+    <button class="filter-tab active" data-filter="all">전체</button>
+    <button class="filter-tab" data-filter="personal">개인</button>
+    <button class="filter-tab" data-filter="shared">공용</button>
+  </div>
+
+  <!-- ========== 리스트 ========== -->
+  <main id="listContainer" class="list-container">
+    <div class="loading" id="loading">불러오는 중...</div>
+  </main>
+
+  <!-- ========== FAB 버튼 ========== -->
+  <button id="btnAdd" class="fab">+</button>
+
+  <!-- ========== 입력 폼 모달 ========== -->
+  <div id="formModal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button id="btnCloseModal" class="modal-close">&times;</button>
+        <h2 id="formTitle" class="modal-title">지출 입력</h2>
+        <button id="btnDeleteEntry" class="modal-delete hidden">삭제</button>
+      </div>
+
+      <form id="entryForm" class="entry-form">
+        <!-- 날짜 -->
+        <div class="form-group">
+          <label class="form-label">날짜</label>
+          <input type="datetime-local" id="inputDate" class="form-input" required>
+        </div>
+
+        <!-- 구분 (개인/공용) -->
+        <div class="form-group">
+          <label class="form-label">구분</label>
+          <div class="toggle-group">
+            <button type="button" class="toggle-btn active" data-value="개인">개인</button>
+            <button type="button" class="toggle-btn" data-value="공용">공용</button>
+          </div>
+        </div>
+
+        <!-- 금액 -->
+        <div class="form-group">
+          <label class="form-label">금액</label>
+          <div class="amount-input-wrap">
+            <input type="text" id="inputAmount" class="form-input amount-input"
+                   inputmode="numeric" placeholder="0" required>
+            <span class="amount-suffix">원</span>
+          </div>
+        </div>
+
+        <!-- 분류 -->
+        <div class="form-group">
+          <label class="form-label">분류</label>
+          <div class="category-grid" id="categoryGrid">
+            <button type="button" class="category-btn" data-value="식비">🍚 식비</button>
+            <button type="button" class="category-btn" data-value="교통/차량">🚗 교통/차량</button>
+            <button type="button" class="category-btn" data-value="문화생활">🎬 문화생활</button>
+            <button type="button" class="category-btn" data-value="마트/편의점">🛒 마트/편의점</button>
+            <button type="button" class="category-btn" data-value="패션/미용">👗 패션/미용</button>
+            <button type="button" class="category-btn" data-value="생활용품">🧹 생활용품</button>
+            <button type="button" class="category-btn" data-value="주거/통신">🏠 주거/통신</button>
+            <button type="button" class="category-btn" data-value="건강">💊 건강</button>
+            <button type="button" class="category-btn" data-value="교육">📚 교육</button>
+            <button type="button" class="category-btn" data-value="경조사/회비">🎉 경조사/회비</button>
+            <button type="button" class="category-btn" data-value="부모님">❤️ 부모님</button>
+            <button type="button" class="category-btn" data-value="기타">📌 기타</button>
+          </div>
+        </div>
+
+        <!-- 자산 -->
+        <div class="form-group">
+          <label class="form-label">자산</label>
+          <div class="toggle-group">
+            <button type="button" class="toggle-btn asset-btn active" data-value="현금">현금</button>
+            <button type="button" class="toggle-btn asset-btn" data-value="신용카드">신용카드</button>
+          </div>
+        </div>
+
+        <!-- 내용 -->
+        <div class="form-group">
+          <label class="form-label">내용</label>
+          <input type="text" id="inputContent" class="form-input" placeholder="사용 내용" maxlength="100" required>
+        </div>
+
+        <!-- 메모 -->
+        <div class="form-group">
+          <label class="form-label">메모</label>
+          <textarea id="inputMemo" class="form-input form-textarea" placeholder="메모 (선택)" maxlength="200"></textarea>
+        </div>
+
+        <!-- 저장 버튼 -->
+        <button type="submit" id="btnSave" class="btn-save">저장</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========== 로그인 화면 ========== -->
+  <div id="loginScreen" class="login-screen">
+    <div class="login-card">
+      <div class="login-icon">💰</div>
+      <h1 class="login-title">가계부</h1>
+      <p class="login-desc">Google 계정으로 로그인하세요</p>
+      <div id="googleLoginBtn" class="google-btn-wrap"></div>
+    </div>
+  </div>
+
+  <!-- ========== 사용자 정보 (헤더 우측) ========== -->
+
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="js/config.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
