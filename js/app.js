@@ -260,15 +260,14 @@
   function loadData() {
     if (!state.user) return;
 
-    loading.style.display = 'block';
-    loading.textContent = '불러오는 중...';
+    showLoading('불러오는 중...');
 
     var month = state.currentYear + '-' +
       String(state.currentMonth).padStart(2, '0');
 
     jsonpRequest({ action: 'list', month: month })
       .then(function (result) {
-        loading.style.display = 'none';
+        hideLoading();
         if (result.success) {
           state.entries = result.data;
           applyFilter();
@@ -279,7 +278,7 @@
         }
       })
       .catch(function () {
-        loading.style.display = 'none';
+        hideLoading();
         showToast('네트워크 오류');
       });
   }
@@ -489,14 +488,11 @@
       memo: $('inputMemo').value.trim()
     };
 
-    var btnSave = $('btnSave');
-    btnSave.disabled = true;
-    btnSave.textContent = '저장 중...';
+    showLoading('저장 중...');
 
     jsonpRequest(params)
       .then(function (result) {
-        btnSave.disabled = false;
-        btnSave.textContent = '저장';
+        hideLoading();
         if (result.success) {
           showToast(state.editingEntry ? '수정되었습니다' : '저장되었습니다');
           closeForm();
@@ -506,8 +502,7 @@
         }
       })
       .catch(function () {
-        btnSave.disabled = false;
-        btnSave.textContent = '저장';
+        hideLoading();
         showToast('저장 실패');
       });
   }
@@ -517,12 +512,15 @@
     var month = state.currentYear + '-' +
       String(state.currentMonth).padStart(2, '0');
 
+    showLoading('삭제 중...');
+
     jsonpRequest({
       action: 'delete',
       rowIndex: entry.rowIndex,
       month: month
     })
       .then(function (result) {
+        hideLoading();
         if (result.success) {
           showToast('삭제되었습니다');
           closeForm();
@@ -532,6 +530,7 @@
         }
       })
       .catch(function () {
+        hideLoading();
         showToast('삭제 실패');
       });
   }
@@ -588,6 +587,16 @@
   }
 
   // ========== 유틸리티 ==========
+  // ========== 로딩 오버레이 ==========
+  function showLoading(text) {
+    $('loadingText').textContent = text || '처리 중...';
+    $('loadingOverlay').classList.remove('hidden');
+  }
+
+  function hideLoading() {
+    $('loadingOverlay').classList.add('hidden');
+  }
+
   function showUserAvatar() {
     var avatar = $('userAvatar');
     var name = state.user.name || state.user.email;
