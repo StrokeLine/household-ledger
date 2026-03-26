@@ -60,7 +60,7 @@
         <button id="btnDeleteEntry" class="modal-delete hidden">삭제</button>
       </div>
 
-      <form id="entryForm" class="entry-form">
+      <form id="entryForm" class="entry-form" autocomplete="off">
         <!-- 날짜 -->
         <div class="form-group">
           <label class="form-label">날짜</label>
@@ -86,7 +86,7 @@
           <label class="form-label">금액</label>
           <div class="amount-input-wrap">
             <input type="text" id="inputAmount" class="form-input amount-input"
-                   inputmode="numeric" placeholder="0" required>
+                   inputmode="numeric" placeholder="0" required autocomplete="off">
             <span class="amount-suffix">원</span>
           </div>
         </div>
@@ -122,13 +122,13 @@
         <!-- 내용 -->
         <div class="form-group">
           <label class="form-label">내용</label>
-          <input type="text" id="inputContent" class="form-input" placeholder="사용 내용" maxlength="100" required>
+          <input type="text" id="inputContent" class="form-input" placeholder="사용 내용" maxlength="100" required autocomplete="off">
         </div>
 
         <!-- 메모 -->
         <div class="form-group">
           <label class="form-label">메모</label>
-          <textarea id="inputMemo" class="form-input form-textarea" placeholder="메모 (선택)" maxlength="200"></textarea>
+          <textarea id="inputMemo" class="form-input form-textarea" placeholder="메모 (선택)" maxlength="200" autocomplete="off"></textarea>
         </div>
 
         <!-- 저장 버튼 -->
