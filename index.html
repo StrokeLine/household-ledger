@@ -64,7 +64,14 @@
         <!-- 날짜 -->
         <div class="form-group">
           <label class="form-label">날짜</label>
-          <input type="datetime-local" id="inputDate" class="form-input" required>
+          <div class="date-row">
+            <input type="date" id="inputDateDay" class="form-input date-input" required>
+            <div class="time-wrap">
+              <input type="number" id="inputTimeHour" class="form-input time-input" min="0" max="23" placeholder="00" inputmode="numeric">
+              <span class="time-sep">:</span>
+              <input type="number" id="inputTimeMin" class="form-input time-input" min="0" max="59" placeholder="00" inputmode="numeric">
+            </div>
+          </div>
         </div>
 
         <!-- 구분 (개인/공용) -->

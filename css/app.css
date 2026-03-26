@@ -408,6 +408,43 @@ body {
   min-height: 72px;
 }
 
+/* 날짜/시간 입력 */
+.date-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.date-input {
+  flex: 1;
+}
+
+.time-wrap {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.time-input {
+  width: 48px;
+  text-align: center;
+  padding: 12px 6px;
+  -moz-appearance: textfield;
+}
+
+.time-input::-webkit-outer-spin-button,
+.time-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.time-sep {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
 /* 금액 입력 */
 .amount-input-wrap {
   position: relative;

@@ -404,7 +404,14 @@
     if (entry) {
       $('formTitle').textContent = '지출 수정';
       $('btnDeleteEntry').classList.remove('hidden');
-      $('inputDate').value = entry.date.replace(' ', 'T');
+      // '2026-03-26 14:30' → 날짜, 시, 분 분리
+      var dateParts = entry.date.split(' ');
+      $('inputDateDay').value = dateParts[0] || '';
+      if (dateParts[1]) {
+        var timeParts = dateParts[1].split(':');
+        $('inputTimeHour').value = parseInt(timeParts[0]) || 0;
+        $('inputTimeMin').value = parseInt(timeParts[1]) || 0;
+      }
       setToggle('.toggle-btn:not(.asset-btn)', entry.type || '개인');
       $('inputAmount').value = entry.amount ? Number(entry.amount).toLocaleString('ko-KR') : '';
       setCategory(entry.category);
@@ -416,12 +423,11 @@
       $('btnDeleteEntry').classList.add('hidden');
       $('entryForm').reset();
       var now = new Date();
-      var dateStr = now.getFullYear() + '-' +
+      $('inputDateDay').value = now.getFullYear() + '-' +
         String(now.getMonth() + 1).padStart(2, '0') + '-' +
-        String(now.getDate()).padStart(2, '0') + 'T' +
-        String(now.getHours()).padStart(2, '0') + ':' +
-        String(now.getMinutes()).padStart(2, '0');
-      $('inputDate').value = dateStr;
+        String(now.getDate()).padStart(2, '0');
+      $('inputTimeHour').value = now.getHours();
+      $('inputTimeMin').value = now.getMinutes();
       setToggle('.toggle-btn:not(.asset-btn)', '개인');
       setToggle('.asset-btn', '현금');
       clearCategory();
@@ -464,7 +470,10 @@
     var rawAmount = $('inputAmount').value.replace(/[^\d]/g, '');
     if (!rawAmount || Number(rawAmount) === 0) { showToast('금액을 입력해주세요'); return; }
 
-    var dateValue = $('inputDate').value.replace('T', ' ');
+    var day = $('inputDateDay').value;
+    var hour = String($('inputTimeHour').value || 0).padStart(2, '0');
+    var min = String($('inputTimeMin').value || 0).padStart(2, '0');
+    var dateValue = day + ' ' + hour + ':' + min;
 
     var params = {
       action: state.editingEntry ? 'update' : 'add',
