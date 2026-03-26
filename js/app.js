@@ -206,6 +206,26 @@
       });
     });
 
+    // 날짜 탭 → 날짜 피커
+    $('btnDatePick').addEventListener('click', function () {
+      var input = $('inputDateDay');
+      input.showPicker ? input.showPicker() : input.focus();
+    });
+
+    $('inputDateDay').addEventListener('change', function () {
+      updateDateTimeDisplay();
+    });
+
+    // 시간 탭 → 시간 피커
+    $('btnTimePick').addEventListener('click', function () {
+      var input = $('inputTime');
+      input.showPicker ? input.showPicker() : input.focus();
+    });
+
+    $('inputTime').addEventListener('change', function () {
+      updateDateTimeDisplay();
+    });
+
     // 금액 입력 포맷
     $('inputAmount').addEventListener('input', function (e) {
       var raw = e.target.value.replace(/[^\d]/g, '');
@@ -404,14 +424,7 @@
     if (entry) {
       $('formTitle').textContent = '지출 수정';
       $('btnDeleteEntry').classList.remove('hidden');
-      // '2026-03-26 14:30' → 날짜, 시, 분 분리
-      var dateParts = entry.date.split(' ');
-      $('inputDateDay').value = dateParts[0] || '';
-      if (dateParts[1]) {
-        var timeParts = dateParts[1].split(':');
-        $('inputTimeHour').value = parseInt(timeParts[0]) || 0;
-        $('inputTimeMin').value = parseInt(timeParts[1]) || 0;
-      }
+      setDateTime(entry.date);
       setToggle('.toggle-btn:not(.asset-btn)', entry.type || '개인');
       $('inputAmount').value = entry.amount ? Number(entry.amount).toLocaleString('ko-KR') : '';
       setCategory(entry.category);
@@ -423,11 +436,12 @@
       $('btnDeleteEntry').classList.add('hidden');
       $('entryForm').reset();
       var now = new Date();
-      $('inputDateDay').value = now.getFullYear() + '-' +
+      var nowStr = now.getFullYear() + '-' +
         String(now.getMonth() + 1).padStart(2, '0') + '-' +
-        String(now.getDate()).padStart(2, '0');
-      $('inputTimeHour').value = now.getHours();
-      $('inputTimeMin').value = now.getMinutes();
+        String(now.getDate()).padStart(2, '0') + ' ' +
+        String(now.getHours()).padStart(2, '0') + ':' +
+        String(now.getMinutes()).padStart(2, '0');
+      setDateTime(nowStr);
       setToggle('.toggle-btn:not(.asset-btn)', '개인');
       setToggle('.asset-btn', '현금');
       clearCategory();
@@ -470,10 +484,7 @@
     var rawAmount = $('inputAmount').value.replace(/[^\d]/g, '');
     if (!rawAmount || Number(rawAmount) === 0) { showToast('금액을 입력해주세요'); return; }
 
-    var day = $('inputDateDay').value;
-    var hour = String($('inputTimeHour').value || 0).padStart(2, '0');
-    var min = String($('inputTimeMin').value || 0).padStart(2, '0');
-    var dateValue = day + ' ' + hour + ':' + min;
+    var dateValue = getDateTime();
 
     var params = {
       action: state.editingEntry ? 'update' : 'add',
@@ -596,6 +607,27 @@
 
   function hideLoading() {
     $('loadingOverlay').classList.add('hidden');
+  }
+
+  function updateDateTimeDisplay() {
+    var day = $('inputDateDay').value; // '2026-03-26'
+    var time = $('inputTime').value;   // '14:30'
+    $('btnDatePick').textContent = day || '';
+    $('btnTimePick').textContent = time || '';
+  }
+
+  function setDateTime(dateStr) {
+    // '2026-03-26 14:30' → 분리
+    var parts = dateStr.split(' ');
+    $('inputDateDay').value = parts[0] || '';
+    $('inputTime').value = parts[1] || '00:00';
+    updateDateTimeDisplay();
+  }
+
+  function getDateTime() {
+    var day = $('inputDateDay').value;
+    var time = $('inputTime').value || '00:00';
+    return day + ' ' + time;
   }
 
   function showUserAvatar() {
